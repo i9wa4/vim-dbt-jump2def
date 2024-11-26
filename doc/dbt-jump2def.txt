@@ -1,0 +1,5 @@
+*dbt-jump2def.txt*	Jumping to definition in a dbt project.
+
+This is a Vim/Neovim plugin jumping to definition in a dbt project.
+
+vim: ft=help tw=78 et ts=2 sw=2 sts=2 norl
