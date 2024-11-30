@@ -1,0 +1,6 @@
+// deno add jsr:@denops/std
+{
+  "imports": {
+    "@denops/std": "jsr:@denops/std@~7.4.0"
+  }
+}

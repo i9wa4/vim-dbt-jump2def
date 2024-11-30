@@ -1,25 +1,82 @@
-import { assert, Denops, Entrypoint, is } from "./deps.ts";
+import type { Denops, Entrypoint } from "@denops/std";
 
-// This exported `main` function is automatically called by denops.vim.
-//
-// Note that this function is called on Vim startup, so it should execute as quickly as possible.
-// Try to avoid initialization code in this function; instead, define an `init` API and call it from Vim script.
 export const main: Entrypoint = (denops: Denops) => {
-  // Overwrite `dispatcher` to define APIs.
-  //
-  // APIs are invokable from Vim script through `denops#request()` or `denops#notify()`.
-  // Refer to `:help denops#request()` or `:help denops#notify()` for more details.
   denops.dispatcher = {
-    async init() {
-      const { name } = denops;
+    async init(): Promise<void> {
       await denops.cmd(
-        `command! -nargs=? DbtPrintDebug echomsg denops#request('${name}', 'hello', [<q-args>])`,
+        `command! -nargs=? DbtJump2ModelDef call denops#request('${denops.name}', 'jumpToModelDefinition', [<q-args>])`,
       );
     },
 
-    hello(name) {
-      assert(name, is.String);
-      return `Hello, ${name || "Denops"}!`;
+    async jumpToModelDefinition(): Promise<void> {
+      // get current buffer directory
+      const curBufPath = (await denops.call("expand", "%:p")) as string;
+      const escapedCurBufPath = curBufPath.replace(/ /g, "\\ ");
+
+      // check if curBufDir is in a dbt project
+      const dbtProjectYmlRelativePath = (await denops.call(
+        "findfile",
+        "dbt_project.yml", // not considering dbt_project.y'a'ml
+        escapedCurBufPath + ";",
+      )) as string;
+
+      if (!dbtProjectYmlRelativePath) {
+        await denops.cmd("echohl Error");
+        await denops.cmd(
+          "echomsg msg",
+          { msg: `[vim-dbt-jump2def] Not in a dbt project` },
+        );
+        await denops.cmd("echohl None");
+      }
+
+      const dbtProjectRootPath = (await denops.call(
+        "fnamemodify",
+        dbtProjectYmlRelativePath,
+        ":p:h",
+      )) as string;
+
+      // get target model name in current line
+      const currentLine = (await denops.call("getline", ".")) as string;
+      // targetModelName is inside "" or ''
+      const targetModelName = currentLine.match(/['"]([^'"]+)['"]/)?.[1];
+
+      if (!targetModelName) {
+        await denops.cmd("echohl Error");
+        await denops.cmd(
+          "echomsg msg",
+          { msg: `[vim-dbt-jump2def] No model name found` },
+        );
+        await denops.cmd("echohl None");
+      }
+
+      // get target model file path
+      const targetModelRalativePath = (await denops.call(
+        "findfile",
+        `${targetModelName}.sql`,
+        dbtProjectRootPath + "**",
+      )) as string;
+
+      if (!targetModelRalativePath) {
+        await denops.cmd("echohl Error");
+        await denops.cmd(
+          "echomsg msg",
+          { msg: `[vim-dbt-jump2def] Model not found: ${targetModelName}` },
+        );
+        await denops.cmd("echohl None");
+      }
+
+      const targetModelPath = (await denops.call(
+        "fnamemodify",
+        targetModelRalativePath,
+        ":p:~",
+      )) as string;
+
+      // open target model file
+      await denops.cmd(`edit ${targetModelPath}`);
+      // await denops.cmd(
+      //   "echomsg msg",
+      //   { msg: `[vim-dbt-jump2def] Jumped to Definition: ${targetModelName}` },
+      // );
     },
   };
 };
