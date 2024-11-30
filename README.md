@@ -14,3 +14,9 @@ Read [help](doc/dbt-jump2def.txt) for details.
 Install as a general Vim/Neovim plugin.
 
 ## 3. Usage
+
+Execute the command.
+
+```vim
+:DbtJump2ModelDef
+```

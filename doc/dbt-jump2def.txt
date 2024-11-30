@@ -2,4 +2,12 @@
 
 This is a Vim/Neovim plugin jumping to definition in a dbt project.
 
+==============================================================================
+COMMAND                                                 *dbt-jump2def-command*
+
+DbtJump2ModelDef
+	:DbtJump2ModelDef
+
+	Jump to the definition of the model under the cursor.
+
 vim: ft=help tw=78 et ts=2 sw=2 sts=2 norl
