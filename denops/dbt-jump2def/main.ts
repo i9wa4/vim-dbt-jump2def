@@ -9,52 +9,59 @@ import { echo, echoerr } from "jsr:@denops/std/helper";
 
 export const main: Entrypoint = (denops: Denops) => {
   denops.dispatcher = {
+    // initialize the plugin
     async init(): Promise<void> {
       await denops.cmd(
         `command! -nargs=? DbtJump2ModelDef call denops#request('${denops.name}', 'jumpToModelDefinition', [<q-args>])`,
       );
     },
 
+    // jump to the definition of the model on the cursor
     async jumpToModelDefinition(): Promise<void> {
-      // get current buffer directory
+      // get current buffer path
       const curBufPath = await expand(denops, "%:p");
-      const escapedCurBufPath = fnameescape(denops, curBufPath);
+      const escapedCurBufPath = await fnameescape(denops, curBufPath);
 
-      // check if curBufDir is in a dbt project
+      // if there is no dbt_project.yml in the parent directories,
+      // regarding the current buffer as not in a dbt project
       const dbtProjectYmlRelativePath = await findfile(
         denops,
         "dbt_project.yml",
         escapedCurBufPath + ";",
       );
 
+      // if not in a dbt project, show error message
       if (!dbtProjectYmlRelativePath) {
         await echoerr(denops, `[vim-dbt-jump2def] Not in a dbt project`);
         return;
       }
 
+      // get the absolute path of the root directory of the dbt project
       const dbtProjectRootPath = await fnamemodify(
         denops,
         dbtProjectYmlRelativePath,
         ":p:h",
       );
 
-      // get target model name in current line
+      // get the target model name in the line on the cursor
+      // the model name should be written inside single or double quotes
       const currentLine = (await denops.call("getline", ".")) as string;
-      // targetModelName is inside "" or ''
       const targetModelName = currentLine.match(/['"]([^'"]+)['"]/)?.[1];
 
+      // if no model name found, show error message
       if (!targetModelName) {
         await echoerr(denops, `[vim-dbt-jump2def] No model name found`);
         return;
       }
 
-      // get target model file path
+      // get the relative path of the target model
       const targetModelRalativePath = await findfile(
         denops,
         `${targetModelName}.sql`,
         dbtProjectRootPath + "**",
       );
 
+      // if the target model not found, show error message
       if (!targetModelRalativePath) {
         await echoerr(
           denops,
@@ -63,6 +70,7 @@ export const main: Entrypoint = (denops: Denops) => {
         return;
       }
 
+      // get the absolute path of the target model
       const targetModelPath = await fnamemodify(
         denops,
         targetModelRalativePath,
