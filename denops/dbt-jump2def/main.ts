@@ -16,7 +16,7 @@ export const main: Entrypoint = (denops: Denops) => {
       );
     },
 
-    // jump to the definition of the model on the cursor
+    // jump to the definition of the model in the current line
     async jumpToModelDefinition(): Promise<void> {
       // get current buffer path
       const curBufPath = await expand(denops, "%:p");
@@ -43,7 +43,7 @@ export const main: Entrypoint = (denops: Denops) => {
         ":p:h",
       );
 
-      // get the target model name in the line on the cursor
+      // get the target model name in the current line
       // the model name should be written inside single or double quotes
       const currentLine = (await denops.call("getline", ".")) as string;
       const targetModelName = currentLine.match(/['"]([^'"]+)['"]/)?.[1];
