@@ -1,4 +1,4 @@
-// deno add jsr:@denops/std
+// deno add jsr:@denops/std@~7.4.0
 {
   "imports": {
     "@denops/std": "jsr:@denops/std@~7.4.0"
