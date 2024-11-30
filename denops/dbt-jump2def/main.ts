@@ -1,9 +1,4 @@
-import {
-  Denops,
-  Entrypoint,
-  assert,
-  is,
-} from "./deps.ts";
+import { assert, Denops, Entrypoint, is } from "./deps.ts";
 
 // This exported `main` function is automatically called by denops.vim.
 //
