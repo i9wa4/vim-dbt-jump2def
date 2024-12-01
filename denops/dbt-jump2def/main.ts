@@ -32,7 +32,7 @@ export const main: Entrypoint = (denops: Denops) => {
 
       // if not in a dbt project, show error message
       if (!dbtProjectYmlRelativePath) {
-        await echoerr(denops, `[vim-dbt-jump2def] Not in a dbt project`);
+        await echoerr(denops, `[dbt-jump2def] Not in a dbt project`);
         return;
       }
 
@@ -50,7 +50,7 @@ export const main: Entrypoint = (denops: Denops) => {
 
       // if no model name found, show error message
       if (!targetModelName) {
-        await echoerr(denops, `[vim-dbt-jump2def] No model name found`);
+        await echoerr(denops, `[dbt-jump2def] No model name found`);
         return;
       }
 
@@ -65,7 +65,7 @@ export const main: Entrypoint = (denops: Denops) => {
       if (!targetModelRalativePath) {
         await echoerr(
           denops,
-          `[vim-dbt-jump2def] Model not found: ${targetModelName}`,
+          `[dbt-jump2def] Model not found: ${targetModelName}`,
         );
         return;
       }
@@ -81,7 +81,7 @@ export const main: Entrypoint = (denops: Denops) => {
       await denops.cmd(`edit ${targetModelPath}`);
       await echo(
         denops,
-        `[vim-dbt-jump2def] Jumped to Definition: ${targetModelName}`,
+        `[dbt-jump2def] Jumped to Definition: ${targetModelName}`,
       );
       return;
     },
