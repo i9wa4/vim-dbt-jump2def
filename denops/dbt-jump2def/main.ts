@@ -1,11 +1,6 @@
-import type { Denops, Entrypoint } from "@denops/std";
-import {
-  expand,
-  findfile,
-  fnameescape,
-  fnamemodify,
-} from "@denops/std/function";
-import { echo, echoerr } from "@denops/std/helper";
+import type { Denops, Entrypoint } from "./deps.ts";
+import { fn } from "./deps.ts";
+import { helper } from "./deps.ts";
 
 export const main: Entrypoint = (denops: Denops) => {
   denops.dispatcher = {
@@ -19,12 +14,12 @@ export const main: Entrypoint = (denops: Denops) => {
     // jump to the definition of the model in the current line
     async jumpToModelDefinition(): Promise<void> {
       // get current buffer path
-      const curBufPath = await expand(denops, "%:p");
-      const escapedCurBufPath = await fnameescape(denops, curBufPath);
+      const curBufPath = await fn.expand(denops, "%:p");
+      const escapedCurBufPath = await fn.fnameescape(denops, curBufPath);
 
       // if there is no dbt_project.yml in the parent directories,
       // regarding the current buffer as not in a dbt project
-      const dbtProjectYmlRelativePath = await findfile(
+      const dbtProjectYmlRelativePath = await fn.findfile(
         denops,
         "dbt_project.yml",
         escapedCurBufPath + ";",
@@ -32,12 +27,12 @@ export const main: Entrypoint = (denops: Denops) => {
 
       // if not in a dbt project, show error message
       if (!dbtProjectYmlRelativePath) {
-        await echoerr(denops, `[dbt-jump2def] Not in a dbt project`);
+        await helper.echoerr(denops, `[dbt-jump2def] Not in a dbt project`);
         return;
       }
 
       // get the absolute path of the root directory of the dbt project
-      const dbtProjectRootPath = await fnamemodify(
+      const dbtProjectRootPath = await fn.fnamemodify(
         denops,
         dbtProjectYmlRelativePath,
         ":p:h",
@@ -50,12 +45,12 @@ export const main: Entrypoint = (denops: Denops) => {
 
       // if no model name found, show error message
       if (!targetModelName) {
-        await echoerr(denops, `[dbt-jump2def] No model name found`);
+        await helper.echoerr(denops, `[dbt-jump2def] No model name found`);
         return;
       }
 
       // get the relative path of the target model
-      const targetModelRalativePath = await findfile(
+      const targetModelRalativePath = await fn.findfile(
         denops,
         `${targetModelName}.sql`,
         dbtProjectRootPath + "**",
@@ -63,7 +58,7 @@ export const main: Entrypoint = (denops: Denops) => {
 
       // if the target model not found, show error message
       if (!targetModelRalativePath) {
-        await echoerr(
+        await helper.echoerr(
           denops,
           `[dbt-jump2def] Model not found: ${targetModelName}`,
         );
@@ -71,7 +66,7 @@ export const main: Entrypoint = (denops: Denops) => {
       }
 
       // get the absolute path of the target model
-      const targetModelPath = await fnamemodify(
+      const targetModelPath = await fn.fnamemodify(
         denops,
         targetModelRalativePath,
         ":p:~",
@@ -79,7 +74,7 @@ export const main: Entrypoint = (denops: Denops) => {
 
       // open target model file
       await denops.cmd(`edit ${targetModelPath}`);
-      await echo(
+      await helper.echo(
         denops,
         `[dbt-jump2def] Jumped to Definition: ${targetModelName}`,
       );

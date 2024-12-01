@@ -1,8 +1,0 @@
-// deno add jsr:@denops/std@~7.4.0
-{
-  "imports": {
-    "@denops/std": "jsr:@denops/std@~7.4.0",
-    "@denops/std/function": "jsr:@denops/std@~7.4.0/function",
-    "@denops/std/helper": "jsr:@denops/std@~7.4.0/helper"
-  }
-}
