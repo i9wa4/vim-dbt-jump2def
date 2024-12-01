@@ -4,8 +4,8 @@ import {
   findfile,
   fnameescape,
   fnamemodify,
-} from "jsr:@denops/std/function";
-import { echo, echoerr } from "jsr:@denops/std/helper";
+} from "@denops/std/function";
+import { echo, echoerr } from "@denops/std/helper";
 
 export const main: Entrypoint = (denops: Denops) => {
   denops.dispatcher = {
