@@ -67,7 +67,7 @@ export const main: Entrypoint = (denops: Denops) => {
           denops,
           `[dbt-jump2def] Model not found: ${targetModelName}`,
         );
-      } else if (!fn.filereadable(denops, targetModelPath)) {
+      } else if (!(await fn.filereadable(denops, targetModelPath))) {
         // if targetModelPath is not readable, show error message
         await helper.echoerr(
           denops,
