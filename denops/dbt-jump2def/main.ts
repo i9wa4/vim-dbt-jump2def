@@ -50,10 +50,11 @@ export const main: Entrypoint = (denops: Denops) => {
       }
 
       // get the relative path of the target model
+      // exclude the "target" directory
       const targetModelRalativePath = await fn.findfile(
         denops,
         `${targetModelName}.sql`,
-        dbtProjectRootPath + "**",
+        dbtProjectRootPath + "**,!target/**",
       );
 
       // if the target model not found, show error message
