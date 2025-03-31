@@ -49,36 +49,38 @@ export const main: Entrypoint = (denops: Denops) => {
         return;
       }
 
-      // get the relative path of the target model
-      // exclude the "target" directory
-      const targetModelRalativePath = await fn.findfile(
+      // get the absolute path of the target model
+      const targetModelPathList = await fn.findfile(
         denops,
         `${targetModelName}.sql`,
-        dbtProjectRootPath + "**,!target/**",
-      );
+        dbtProjectRootPath + "**",
+        -1,
+      ) as unknown as string[];
 
-      // if the target model not found, show error message
-      if (!targetModelRalativePath) {
+      // exclude paths which contains "/target/"
+      const targetModelPath =
+        targetModelPathList.filter((path) => !path.includes("/target/"))[0];
+
+      if (!targetModelPath) {
+        // if the target model not found, show error message
         await helper.echoerr(
           denops,
           `[dbt-jump2def] Model not found: ${targetModelName}`,
         );
-        return;
+      } else if (!fn.filereadable(denops, targetModelPath)) {
+        // if targetModelPath is not readable, show error message
+        await helper.echoerr(
+          denops,
+          `[dbt-jump2def] Model not readable: ${targetModelName}`,
+        );
+      } else {
+        // open target model file
+        await denops.cmd(`edit ${targetModelPath}`);
+        await helper.echo(
+          denops,
+          `[dbt-jump2def] Jumped to Definition: ${targetModelName}`,
+        );
       }
-
-      // get the absolute path of the target model
-      const targetModelPath = await fn.fnamemodify(
-        denops,
-        targetModelRalativePath,
-        ":p:~",
-      );
-
-      // open target model file
-      await denops.cmd(`edit ${targetModelPath}`);
-      await helper.echo(
-        denops,
-        `[dbt-jump2def] Jumped to Definition: ${targetModelName}`,
-      );
       return;
     },
   };
